@@ -19,6 +19,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
   private static final String WORKSPACE_PATH = "/workspaces/:wkspid";
   private static final String ARTIFACT_PATH = "/workspaces/:wkspid/artifacts/:artid";
+  private static final String AGENT_PATH = "/workspaces/:wkspid/agents/:agntid";
   private static final String TURTLE_CONTENT_TYPE = "text/turtle";
 
   private HttpServer server;
@@ -112,16 +113,24 @@ public class HttpServerVerticle extends AbstractVerticle {
     router.delete(WORKSPACE_PATH + "/").handler(handler::handleDeleteEntity);
     router.delete(WORKSPACE_PATH).handler(handler::handleDeleteEntity);
 
-    router.post(WORKSPACE_PATH + "/join/").handler(handler::handleRedirectWithoutSlash);
-    final var joinRoute = router.post(WORKSPACE_PATH + "/join")
+    router.post(WORKSPACE_PATH + "/agents/").handler(handler::handleRedirectWithoutSlash);
+    final var joinRoute = router.post(WORKSPACE_PATH + "/agents")
       .handler(handler::handleJoinWorkspace);
-    router.post(WORKSPACE_PATH + "/leave/").handler(handler::handleRedirectWithoutSlash);
-    final var leaveRoute = router.post(WORKSPACE_PATH + "/leave")
+    router.delete(AGENT_PATH + "/").handler(handler::handleRedirectWithoutSlash);
+    final var leaveRoute = router.delete(AGENT_PATH)
       .handler(handler::handleLeaveWorkspace);
     router.post(WORKSPACE_PATH + "/focus/").handler(handler::handleRedirectWithoutSlash);
     final var focusRoute = router.post(WORKSPACE_PATH + "/focus")
       .consumes(ContentType.APPLICATION_JSON.getMimeType())
       .handler(handler::handleFocus);
+
+    router.get(AGENT_PATH + "/").handler(handler::handleRedirectWithoutSlash);
+    final var getAgentRoute = router.get(AGENT_PATH)
+      .handler(handler::handleGetEntity);
+
+    router.put(AGENT_PATH + "/").handler(handler::handleRedirectWithoutSlash);
+    final var updateAgentRoute = router.put(AGENT_PATH)
+      .handler(handler::handleUpdateEntity);
 
     router.post("/workspaces/:wkspid/artifacts/")
       .consumes(TURTLE_CONTENT_TYPE)
@@ -149,6 +158,8 @@ public class HttpServerVerticle extends AbstractVerticle {
       joinRoute.disable();
       leaveRoute.disable();
       focusRoute.disable();
+      getAgentRoute.disable();
+      updateAgentRoute.disable();
       createArtifactRoute.disable();
       actionRoute.disable();
     }
