@@ -73,10 +73,10 @@
         ]
     ];
   hmas:isHostedOn <#platform>;
-  hmas:contains <workspaces/test/artifacts/c0/#artifact>, <workspaces/test/artifacts/test_agent/#artifact> .
+  hmas:contains <workspaces/test/artifacts/c0/#artifact>, <workspaces/test/agents/test_agent/#artifact> .
 
 <#platform> a hmas:HypermediaMASPlatform .
 
 <workspaces/test/artifacts/c0/#artifact> a hmas:Artifact .
 
-<workspaces/test/artifacts/test_agent/#artifact> a hmas:Artifact, jacamo:Body .
+<workspaces/test/agents/test_agent/#artifact> a hmas:Artifact, jacamo:Body .

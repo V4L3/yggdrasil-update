@@ -9,7 +9,7 @@
 @prefix ex: <http://example.org/> .
 @prefix jacamo: <https://purl.org/hmas/jacamo/> .
 
-<workspaces/test/artifacts/test_agent/#artifact> a td:Thing, hmas:Artifact, jacamo:Body;
+<workspaces/test/agents/test_agent/#artifact> a td:Thing, hmas:Artifact, jacamo:Body;
   td:title "test_agent";
   td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme
     ];

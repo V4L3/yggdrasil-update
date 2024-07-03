@@ -34,6 +34,7 @@ public class BodyNotificationTest {
   private static final String TEST_AGENT_NAME = "test_agent";
   private static final String TEST_AGENT_ID = "http://localhost:8080/agents/" + TEST_AGENT_NAME;
   private static final String AGENT_ID_HEADER = "X-Agent-WebID";
+  private static final String AGENT_NAME_HEADER = "X-Agent-LocalName";
   private static final String MAIN_WORKSPACE_NAME = "test";
   private static final String ARTIFACT_NAME = "artifactName";
   private static final String ACTION_NAME = "actionName";
@@ -56,6 +57,7 @@ public class BodyNotificationTest {
   private static final String HUB_PATH = "/hub/";
   private static final String WORKSPACES_PATH = "/workspaces/";
   private static final String ARTIFACTS_PATH = "/artifacts/";
+  private static final String AGENTS_PATH = "/agents/";
   private static final String CALLBACK_URL = "http://" + TEST_HOST + ":" + 8081 + "/";
 
   private List<Promise<Map.Entry<String, String>>> callbackMessages;
@@ -207,7 +209,7 @@ public class BodyNotificationTest {
                             this.getUrl(
                               WORKSPACES_PATH
                               + MAIN_WORKSPACE_NAME
-                              + ARTIFACTS_PATH
+                              + AGENTS_PATH
                             ),
                             HUB_CALLBACK_PARAM,
                             CALLBACK_URL
@@ -224,9 +226,10 @@ public class BodyNotificationTest {
                           .post(
                             TEST_PORT,
                             TEST_HOST,
-                            WORKSPACES_PATH + MAIN_WORKSPACE_NAME + "/join"
+                            WORKSPACES_PATH + MAIN_WORKSPACE_NAME + "/agents"
                           )
                           .putHeader(AGENT_ID_HEADER, TEST_AGENT_ID)
+                          .putHeader(AGENT_NAME_HEADER, TEST_AGENT_NAME)
                           .send())
         .onSuccess(r -> {
           Assertions.assertEquals(
@@ -254,7 +257,7 @@ public class BodyNotificationTest {
         .compose(r -> this.callbackMessages.get(1).future())
         .onSuccess(m -> {
           Assertions.assertEquals(
-              this.getUrl(WORKSPACES_PATH + MAIN_WORKSPACE_NAME + ARTIFACTS_PATH),
+              this.getUrl(WORKSPACES_PATH + MAIN_WORKSPACE_NAME + AGENTS_PATH),
               m.getKey(),
               URIS_EQUAL_MESSAGE
           );
@@ -272,7 +275,7 @@ public class BodyNotificationTest {
                             this.getUrl(
                               WORKSPACES_PATH
                               + MAIN_WORKSPACE_NAME
-                              + ARTIFACTS_PATH
+                              + AGENTS_PATH
                               + TEST_AGENT_NAME
                               + "/"
                             ),
@@ -314,7 +317,7 @@ public class BodyNotificationTest {
               this.getUrl(
                 WORKSPACES_PATH
                 + MAIN_WORKSPACE_NAME
-                + ARTIFACTS_PATH
+                + AGENTS_PATH
                 + TEST_AGENT_NAME
                 + "/"
               ),
@@ -342,7 +345,7 @@ public class BodyNotificationTest {
               this.getUrl(
                 WORKSPACES_PATH
                 + MAIN_WORKSPACE_NAME
-                + ARTIFACTS_PATH
+                + AGENTS_PATH
                 + TEST_AGENT_NAME
                 + "/"
               ),
