@@ -41,6 +41,8 @@ java -jar build/libs/yggdrasil-0.0.0-SNAPSHOT-all.jar -conf conf/localhost_memor
 ```
 
 The configuration file is optional.
+Yggdrasil currently supports the HMAS and TD ontologies. If none is specified in the configuration file it defaults to TD.
+
 Open your browser to [http://localhost:8080](http://localhost:8080).
 You should see a description of the platform like the following:
 
