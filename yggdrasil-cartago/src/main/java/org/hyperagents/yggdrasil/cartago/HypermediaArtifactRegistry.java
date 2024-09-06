@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.UnaryOperator;
 
 import org.hyperagents.yggdrasil.cartago.artifacts.HypermediaArtifact;
+import org.hyperagents.yggdrasil.cartago.artifacts.SyncedHypermediaTDArtifact;
 
 /**
  * A singleton used to manage CArtAgO artifacts. An equivalent implementation can be obtained with
@@ -37,6 +38,8 @@ public final class HypermediaArtifactRegistry {
   private final Map<String, String> artifactNames;
   private final Map<String, Map<String, UnaryOperator<Object>>> feedbackResponseConverters;
   private int counter;
+  private final Map<String, HashMap<String,Integer>> artifactTimestamps;
+
 
   public HypermediaArtifactRegistry() {
     this.artifactSemanticTypes = new ConcurrentHashMap<>();
@@ -47,6 +50,7 @@ public final class HypermediaArtifactRegistry {
     this.artifactNames = Collections.synchronizedMap(new HashMap<>());
     this.feedbackResponseConverters = Collections.synchronizedMap(new HashMap<>());
     this.counter = 0;
+    this.artifactTimestamps = Collections.synchronizedMap(new HashMap<>());
   }
 
   public void register(final HypermediaArtifact artifact) {
@@ -73,6 +77,29 @@ public final class HypermediaArtifactRegistry {
           signifier.getKey()
         )));
     this.feedbackResponseConverters.put(artifactTemplate, artifact.getResponseConverterMap());
+
+    try {
+      if (artifact instanceof SyncedHypermediaTDArtifact) {
+        registerTimestamp((SyncedHypermediaTDArtifact) artifact);
+      }
+    } catch (Exception e) {
+      System.out.println("Error registering SyncedHypermediaArtifact " + artifact + ": " + e.getMessage());
+    }
+  }
+
+  public void registerTimestamp(SyncedHypermediaTDArtifact artifact) {
+    HashMap<String, Integer> vc = new HashMap<String, Integer>();
+    vc.put(artifact.getArtifactId().toString(), 0);
+    this.artifactTimestamps.put(artifact.getArtifactId().toString(), vc);
+  }
+
+  public void updateTimestamps(String artifactId, HashMap<String, Integer> vc) {
+    this.artifactTimestamps.put(artifactId, vc);
+  }
+
+  public HashMap<String, Integer> getTimestamps(String artifactId) {
+    HashMap<String, Integer> ts = this.artifactTimestamps.get(artifactId);
+    return ts != null ? ts : new HashMap<>();
   }
 
   public void addArtifactTemplate(final String key, final String value) {

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.hyperagents.yggdrasil.cartago.artifacts.HypermediaArtifact;
+import org.hyperagents.yggdrasil.cartago.artifacts.SyncedHypermediaTDArtifact;
 import org.hyperagents.yggdrasil.cartago.entities.NotificationCallback;
 import org.hyperagents.yggdrasil.cartago.entities.WorkspaceRegistry;
 import org.hyperagents.yggdrasil.cartago.entities.impl.WorkspaceRegistryImpl;
@@ -345,7 +346,7 @@ public class CartagoVerticle extends AbstractVerticle {
       .focus(
         this.getAgentId(new AgentIdCredential(agentUri), workspace.getId()),
         p -> true,
-        new NotificationCallback(this.httpConfig, this.dispatcherMessagebox, workspaceName, artifactName),
+        new NotificationCallback(this.httpConfig, this.dispatcherMessagebox, workspaceName, artifactName, registry),
         Optional.ofNullable(workspace.getArtifact(artifactName)).orElseThrow()
       )
       .forEach(p -> this.dispatcherMessagebox.sendMessage(
@@ -381,6 +382,11 @@ public class CartagoVerticle extends AbstractVerticle {
 
     final var artifact = (HypermediaArtifact) workspace.getArtifactDescriptor(artifactId.getName()).getArtifact();
     registry.register(artifact);
+
+    // This should probably be refactored e.g. with an ArtifactFactory
+    if (artifact instanceof SyncedHypermediaTDArtifact syncedArtifact) {
+      syncedArtifact.injectRegistry(registry);
+    }
 
 
     return registry.getArtifactDescription(artifactName);
