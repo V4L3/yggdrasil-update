@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // TODO: Needs refactoring
-public class VectorClock implements LogicalClock {
+public class DynamicVectorClock implements LogicalClock {
 
     private final String artifactId;
 
@@ -16,7 +16,7 @@ public class VectorClock implements LogicalClock {
 
     private final HashMap<String, SyncedArtifact> linkedArtifacts;
 
-    public VectorClock(String artifactId) {
+    public DynamicVectorClock(String artifactId) {
         this.timestamp = 0;
         this.artifactId = artifactId;
         linkedArtifacts = new HashMap<>();

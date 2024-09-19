@@ -74,6 +74,93 @@ public class NotificationCallback implements ICartagoCallback {
   private String formatMessage(String message, String id, Percept percept) {
     HashMap<String, Integer> timestampsMap = registry.getTimestamps(id);
     List<Object> annots = percept.getPropChanged()[0].getAnnots();
+
+    // Extract name and value of the obsProperty from the message
+    String propertyName = "";
+    String propertyValue = "";
+    if (message.contains("(")) {
+      int startIndex = message.indexOf("(");
+      propertyName = message.substring(0, startIndex);
+      propertyValue = message.substring(startIndex + 1, message.length() - 1);
+    }
+
+    StringBuilder jsonLd = new StringBuilder();
+    jsonLd.append("{\n");
+
+    // @context
+    jsonLd.append("  \"@context\": [\n");
+    jsonLd.append("    \"https://www.w3.org/ns/activitystreams\",\n");
+    jsonLd.append("    {\n");
+    jsonLd.append("      \"hmas\": \"https://github.com/V4L3/hMAS-building-automation_home-security_use-case_ontology/blob/main/ontology.owl\"\n");
+    jsonLd.append("    }\n");
+    jsonLd.append("  ],\n");
+
+    // type
+    jsonLd.append("  \"type\": \"Update\",\n");
+
+    // object
+    jsonLd.append("  \"object\": {\n");
+    jsonLd.append("    \"type\": \"hmas:ObservableProperty\",\n");
+    jsonLd.append("    \"name\": \"").append(propertyName).append("\",\n");
+    jsonLd.append("    \"newValue\": \"").append(propertyValue).append("\"");
+
+    // hmas:hasVectorClock
+    if (!timestampsMap.isEmpty()) {
+      jsonLd.append(",\n    \"hmas:hasVectorClock\": {\n");
+      jsonLd.append("      \"@type\": \"hmas:DynamicVectorClock\",\n");
+      jsonLd.append("      \"hmas:hasLogicalTimestamp\": [\n");
+
+      int timestampCount = 0;
+      for (Map.Entry<String, Integer> entry : timestampsMap.entrySet()) {
+        jsonLd.append("        {\n");
+        jsonLd.append("          \"@type\": \"hmas:LogicalTimestamp\",\n");
+        jsonLd.append("          \"hmas:source\": \"").append(entry.getKey()).append("\",\n");
+        jsonLd.append("          \"hmas:value\": ").append(entry.getValue()).append("\n");
+        jsonLd.append("        }");
+        if (timestampCount < timestampsMap.size() - 1) {
+          jsonLd.append(",");
+        }
+        jsonLd.append("\n");
+        timestampCount++;
+      }
+
+      jsonLd.append("      ]\n");
+      jsonLd.append("    }");
+    }
+
+    // hmas:hasAnnotation
+    if (annots != null && !annots.isEmpty()) {
+      jsonLd.append(",\n    \"hmas:hasAnnotation\": {\n");
+      for (int i = 0; i < annots.size(); i++) {
+        String annot = annots.get(i).toString();
+        String annotName = annot.substring(0, annot.indexOf("("));
+        String annotValue = annot.substring(annot.indexOf("(") + 1, annot.length() - 1);
+
+        jsonLd.append("      \"").append(annotName).append("\": \"").append(annotValue).append("\"");
+        if (i < annots.size() - 1) {
+          jsonLd.append(",");
+        }
+        jsonLd.append("\n");
+      }
+      jsonLd.append("    }");
+    }
+
+    jsonLd.append("\n  },\n");
+
+    // actor
+    jsonLd.append("  \"actor\": {\n");
+    jsonLd.append("    \"type\": \"hmas:anonymousActor\"\n"); // ToDo: add acting agent if available
+    jsonLd.append("  }\n");
+
+    jsonLd.append("}");
+
+    return jsonLd.toString();
+  }
+
+
+/*  private String formatMessage(String message, String id, Percept percept) {
+    HashMap<String, Integer> timestampsMap = registry.getTimestamps(id);
+    List<Object> annots = percept.getPropChanged()[0].getAnnots();
     // Extract name and value of the obsProperty from the message
     String propertyName = "";
     String propertyValue = "";
@@ -130,5 +217,5 @@ public class NotificationCallback implements ICartagoCallback {
     jsonLd.append("}");
 
     return jsonLd.toString();
-  }
+  }*/
 }

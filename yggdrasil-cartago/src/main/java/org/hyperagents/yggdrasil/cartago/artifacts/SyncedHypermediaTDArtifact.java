@@ -6,20 +6,20 @@ import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import org.hyperagents.yggdrasil.cartago.HypermediaArtifactRegistry;
 import org.hyperagents.yggdrasil.utils.time.SyncedArtifact;
-import org.hyperagents.yggdrasil.utils.time.VectorClock;
+import org.hyperagents.yggdrasil.utils.time.DynamicVectorClock;
 
 import java.util.Map;
 
 public class SyncedHypermediaTDArtifact extends HypermediaTDArtifact{
-  protected VectorClock vectorClock;
+  protected DynamicVectorClock dynamicVectorClock;
   private HypermediaArtifactRegistry registry;
 
   public void init() {
-    vectorClock = new VectorClock(getArtifactId().toString());
+    dynamicVectorClock = new DynamicVectorClock(getArtifactId().toString());
   }
 
   public void init(Object initializationParameters) {
-    vectorClock = new VectorClock(getArtifactId().toString());
+    dynamicVectorClock = new DynamicVectorClock(getArtifactId().toString());
 
     String artifactName;
     String artifactUpdateUrl;
@@ -42,7 +42,7 @@ public class SyncedHypermediaTDArtifact extends HypermediaTDArtifact{
   @OPERATION
   public void linkArtifact(String artifactId, String artifactEndpoint) {
     SyncedArtifact newArtifact = new SyncedArtifact(artifactId, artifactEndpoint);
-    vectorClock.addArtifact(newArtifact);
+    dynamicVectorClock.addArtifact(newArtifact);
     log("Linked artifact " + artifactId + " to " + artifactEndpoint);
   }
 
@@ -52,13 +52,13 @@ public class SyncedHypermediaTDArtifact extends HypermediaTDArtifact{
 
     int ts = Integer.parseInt(externalTimestamp);
 
-    vectorClock.updateExternalTimestamp(artifactId, ts);
+    dynamicVectorClock.updateExternalTimestamp(artifactId, ts);
 
   }
 
   public void updateInternalTimestamp() {
-    vectorClock.updateInternalTimestamp();
-    registry.updateTimestamps(getArtifactId().toString(),vectorClock.getTimestamps());
+    dynamicVectorClock.updateInternalTimestamp();
+    registry.updateTimestamps(getArtifactId().toString(), dynamicVectorClock.getTimestamps());
   }
 
   public void injectRegistry(HypermediaArtifactRegistry registry) {
@@ -68,7 +68,7 @@ public class SyncedHypermediaTDArtifact extends HypermediaTDArtifact{
 
 
   public final int getInternalTimestamp() {
-    return vectorClock.getInternalTimestamp();
+    return dynamicVectorClock.getInternalTimestamp();
   }
   @Override
   protected void registerInteractionAffordances() {
